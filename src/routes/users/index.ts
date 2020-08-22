@@ -9,6 +9,7 @@ interface IGetQuery extends IQueryParameters {
   search: string;
   skip: string;
   take: string;
+  count: string;
 };
 
 interface IPostBody {
@@ -23,6 +24,7 @@ export class Get extends Route {
   url = '/users';
   method = RequestMethod.GET;
   validation = [
+    check('count').optional().isBoolean(),
     check('search').optional().isString(),
     check('skip').optional().isInt(),
     check('take').optional().isInt(),
@@ -30,6 +32,12 @@ export class Get extends Route {
   authorization = true;
 
   async onRequest(req: IRequest<IGetQuery>) {
+    if (req.query.count === 'true') {
+      const count = await User.count();
+      
+      return { count };
+    }
+
     const users = await User.find(searchQuery(['username', 'firstName', 'lastName'], req.query));
 
     return {
