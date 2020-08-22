@@ -25,6 +25,7 @@ export class Get extends Route {
 
   async onRequest(req: IRequest<IGetQuery>) {
     const queue = await findQueueById(req.params.id);
+    const count = await QueuePosition.count({ queue });
     const positions = await QueuePosition.find(
       paginationQuery(req.query, 
         { 
@@ -38,6 +39,7 @@ export class Get extends Route {
     );
 
     return {
+      count,
       positions: positions.map(p => ({ ...p.dto(), user: p.user.dto() })),
     };
   }
