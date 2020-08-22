@@ -16,6 +16,9 @@ class User extends ExtendedEntity {
   @Column({ name: 'last_name', nullable: true })
   public lastName: string;
 
+  @Column({ default: true })
+  public telegram: boolean;
+
   @Column({ type: 'simple-json', default: '{}' })
   public details: any;
 
@@ -29,7 +32,7 @@ class User extends ExtendedEntity {
   public queuePositions: Promise<QueuePosition[]>;
 
   public dto() {
-    return this.pick('id', 'username', 'firstName', 'lastName', 'details', 'createdAt', 'updatedAt');
+    return this.pick('id', 'username', 'firstName', 'lastName', 'telegram', 'details', 'createdAt', 'updatedAt');
   }
 }
 

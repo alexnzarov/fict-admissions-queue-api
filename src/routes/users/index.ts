@@ -14,6 +14,7 @@ interface IGetQuery extends IQueryParameters {
 
 interface IPostBody {
   id: string;
+  telegram: boolean;
   username: string;
   first_name: string;
   last_name: string;
@@ -47,6 +48,7 @@ export class Post extends Route {
   method = RequestMethod.POST;
   validation = [
     check('id').isString(),
+    check('telegram').optional({ nullable: true }).isBoolean(),
     check('username').optional({ nullable: true }).isString(),
     check('first_name').isString(),
     check('last_name').optional({ nullable: false }).isString(),
@@ -55,12 +57,13 @@ export class Post extends Route {
 
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
-    const { id, username, first_name, last_name } = req.body; 
+    const { id, username, first_name, last_name, telegram } = req.body; 
 
     const user = await createUser(
       User.create(
         { 
           id, 
+          telegram: telegram === false ? false : true,
           username, 
           firstName: first_name,
           lastName: last_name,
