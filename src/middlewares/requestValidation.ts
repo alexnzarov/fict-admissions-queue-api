@@ -7,5 +7,5 @@ export default () => (req, _, next) => {
   if (errors.isEmpty()) { return next(); }  
 
   const message = errors.array().map(e => `${e.msg} in '${e.param}' - ${e.value}`).join('\n');
-  next(ServiceException.build(400, message));
+  next(ServiceException.build(400, 'Неправильний запит', message));
 };

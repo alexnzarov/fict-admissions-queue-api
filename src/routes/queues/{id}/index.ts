@@ -1,8 +1,7 @@
-import { Queue } from "../../../db/entities/Queue";
-import { ServiceException } from "../../../core/exception";
 import { Route, RequestMethod, IRequest } from "../../../core/api";
 import { check } from "express-validator";
 import logger from "../../../core/logger";
+import { findQueueById } from "../../../services";
 
 interface IPostBody {
   active: boolean;
@@ -14,15 +13,12 @@ export class Get extends Route {
   method = RequestMethod.GET;
 
   async onRequest(req: IRequest) {
-    const queue = await Queue.findOne({ id: parseInt(req.params.id) });
-
-    if (!queue) {
-      throw ServiceException.build(404, 'Такої черги не існує');
-    }
+    const queue = await findQueueById(req.params.id);
 
     return {
       queue: queue.dto(),
       queueSize: await queue.getQueueSize(),
+      lastPosition: queue.getLastPosition(),
     };
   }
 };
@@ -39,11 +35,7 @@ export class Post extends Route {
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
     const { active } = req.body; 
-    const queue = await Queue.findOne({ id: parseInt(req.params.id) });
-  
-    if (!queue) {
-      throw ServiceException.build(404, 'Такої черги не існує');
-    }
+    const queue = await findQueueById(req.params.id);
 
     if (active != null) {
       queue.active = active;

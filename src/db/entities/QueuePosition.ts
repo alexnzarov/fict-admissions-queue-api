@@ -19,8 +19,8 @@ class QueuePosition extends ExtendedEntity {
   public user: User;
 
   @JoinColumn({ name: 'queue_id' })
-  @ManyToOne(type => Queue, queue => queue.positions, { lazy: true })
-  public queue: Promise<Queue>;
+  @ManyToOne(type => Queue, queue => queue.positions)
+  public queue: Queue;
 
   @Column({ type: 'int' })
   public code: number;
@@ -38,7 +38,7 @@ class QueuePosition extends ExtendedEntity {
   public updatedAt: Date;
 
   public dto() {
-    return this.pick('id', 'code', 'position', 'createdAt', 'updatedAt');
+    return this.pick('id', 'code', 'position', 'status', 'createdAt', 'updatedAt');
   }
 }
 

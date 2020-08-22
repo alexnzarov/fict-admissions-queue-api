@@ -2,6 +2,8 @@ import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateCol
 import { ExtendedEntity } from "./ExtendedEntity";
 import { QueuePosition, QueuePositionStatus } from "./QueuePosition";
 
+const positionCache = {};
+
 @Entity("queues")
 class Queue extends ExtendedEntity {
   @PrimaryGeneratedColumn('increment')
@@ -46,6 +48,33 @@ class Queue extends ExtendedEntity {
         status: QueuePositionStatus.WAITING,
       } 
     });
+  }
+
+  public getLastPosition() {
+    return positionCache[this.id] ?? 0;
+  }
+
+  public generatePosition() {
+    if (!(this.id in positionCache)) {
+      positionCache[this.id] = 0;
+    }
+
+    return ++positionCache[this.id];
+  }
+
+  public static async updatePositionCache() {
+    const queues = await Queue.find();
+
+    for (let queue of queues) {
+      const lastPosition = await QueuePosition.findOne({
+        where: { queue },
+        order: {
+          code: 'DESC',
+        },
+      });
+
+      positionCache[queue.id] = lastPosition ? lastPosition.code : 0;
+    }
   }
 }
 

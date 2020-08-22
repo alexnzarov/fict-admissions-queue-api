@@ -1,9 +1,9 @@
-import { ServiceException } from "../../core/exception";
 import { Route, RequestMethod, IRequest, IQueryParameters } from "../../core/api";
 import { check } from "express-validator";
 import { User } from "../../db/entities/User";
 import { searchQuery } from "../../util/query";
 import logger from "../../core/logger";
+import { createUser } from "../../services";
 
 interface IGetQuery extends IQueryParameters {
   skip: string;
@@ -52,20 +52,17 @@ export class Post extends Route {
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
     const { id, username, first_name, last_name } = req.body; 
-    let user = await User.findOne({ id });
-  
-    if (user) {
-      throw ServiceException.build(409, 'Користувач з таким ідентифікатором вже існує');
-    }
 
-    user = await User.create(
-      { 
-        id, 
-        username, 
-        firstName: first_name,
-        lastName: last_name,
-      }
-    ).save();
+    const user = await createUser(
+      User.create(
+        { 
+          id, 
+          username, 
+          firstName: first_name,
+          lastName: last_name,
+        }
+      )
+    );
 
     logger.info('User created', { id, user: authorization.name });
   
