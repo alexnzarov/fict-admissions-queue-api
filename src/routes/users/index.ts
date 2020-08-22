@@ -6,6 +6,7 @@ import logger from "../../core/logger";
 import { createUser } from "../../services";
 
 interface IGetQuery extends IQueryParameters {
+  search: string;
   skip: string;
   take: string;
 };

@@ -7,7 +7,7 @@ class User extends ExtendedEntity {
   @PrimaryColumn()
   public id: string;
 
-  @Column()
+  @Column({ nullable: true })
   public username: string;
 
   @Column({ name: 'first_name', nullable: true })
@@ -25,8 +25,8 @@ class User extends ExtendedEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   public updatedAt: Date;
 
-  @OneToMany(type => QueuePosition, position => position.user)
-  public queuePositions: QueuePosition[];
+  @OneToMany(type => QueuePosition, position => position.user, { lazy: true })
+  public queuePositions: Promise<QueuePosition[]>;
 
   public dto() {
     return this.pick('id', 'username', 'firstName', 'lastName', 'details', 'createdAt', 'updatedAt');

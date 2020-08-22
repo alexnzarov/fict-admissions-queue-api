@@ -6,7 +6,6 @@ import { Queue } from "./Queue";
 export enum QueuePositionStatus {
   WAITING = 'waiting',
   PROCESSING = 'processing',
-  DONE = 'done',
 };
 
 @Entity("queue_positions")
