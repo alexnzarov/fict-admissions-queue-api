@@ -94,7 +94,7 @@ class Queue extends ExtendedEntity {
       });
 
       positionCache[queue.id] = lastPosition ? lastPosition.code : 0;
-      lastAdvanceCache[queue.id] = firstToAdvance ? firstToAdvance.position - 1 : 0;
+      lastAdvanceCache[queue.id] = firstToAdvance ? firstToAdvance.position - 1 : positionCache[queue.id];
     }
   }
 }
