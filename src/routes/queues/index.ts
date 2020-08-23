@@ -44,7 +44,7 @@ export class Post extends Route {
       )
     );
 
-    logger.info('Queue created', { id: queue.id, name: queue.name, user: authorization.name });
+    logger.info('Queue created', { id: queue.id, name: queue.name, by: authorization.name });
 
     return {
       queue: queue.dto(),

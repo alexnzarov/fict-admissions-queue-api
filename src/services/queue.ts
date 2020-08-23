@@ -1,6 +1,6 @@
 import { Queue } from '../db/entities/Queue';
 import { ServiceException } from '../core/exception';
-import { QueuePosition } from '../db/entities/QueuePosition';
+import { QueuePosition, QueuePositionStatus } from '../db/entities/QueuePosition';
 import { User } from '../db/entities/User';
 import { FindOneOptions, FindManyOptions } from 'typeorm';
 
@@ -57,3 +57,19 @@ export const deleteQueuePosition = async (queue: Queue, user: User) => {
 
 export const updateQueueCache = () => Queue.updatePositionCache();
 
+export const advanceQueue = async (queue: Queue) => {
+  const position = await QueuePosition.findOne({ status: QueuePositionStatus.WAITING, queue }, {
+    order: {
+      position: 'ASC',
+    },
+    relations: ['user'],
+  });
+
+  if (!position) {
+    throw ServiceException.build(404, 'У черзі нікого немає');
+  }
+
+  position.status = QueuePositionStatus.PROCESSING;
+
+  return await position.save();
+};

@@ -43,7 +43,7 @@ export class Post extends Route {
 
     await queue.save();
 
-    logger.info('Queue updated', { id: queue.id, user: authorization.name, body: req.body });
+    logger.info('Queue updated', { id: queue.id, by: authorization.name, body: req.body });
 
     return {
       queue: queue.dto(),

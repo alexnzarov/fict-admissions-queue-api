@@ -71,7 +71,7 @@ export class Post extends Route {
       )
     );
 
-    logger.info('User created', { id, user: authorization.name });
+    logger.info('User created', { id, by: authorization.name });
   
     return {
       user: user.dto(),

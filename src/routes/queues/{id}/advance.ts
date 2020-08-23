@@ -1,21 +1,23 @@
-import { Queue } from "../../../db/entities/Queue";
-import { ServiceException } from "../../../core/exception";
 import { Route, RequestMethod, IRequest } from "../../../core/api";
-import { check } from "express-validator";
-import { findQueueById } from "../../../services";
+import { findQueueById, advanceQueue } from "../../../services";
+import logger from "../../../core/logger";
 
-/** PUT /queues/:id/advance */
+/** POST /queues/:id/advance */
 export class Post extends Route {
   url = '/queues/:id/advance';
-  method = RequestMethod.PUT;
+  method = RequestMethod.POST;
   authorization = true;
 
   async onRequest(req: IRequest) {
     const { authorization } = req; 
     const queue = await findQueueById(req.params.id);
+    const position = await advanceQueue(queue);
 
+    logger.info('Queue advanced', { queue: queue.id, position: position.user.id, by: authorization.name });
 
-
-    return {};
+    return {
+      position: position.dto(),
+      user: position.user.dto(),
+    };
   }
 };

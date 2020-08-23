@@ -19,7 +19,7 @@ export class Post extends Route {
     const details = pick(req.body, tokens.map(t => t.token));
     user.details = details;
 
-    logger.info('User details updated', { id: user.id, details, user: authorization.name });
+    logger.info('User details updated', { id: user.id, details, by: authorization.name });
 
     await user.save();
     

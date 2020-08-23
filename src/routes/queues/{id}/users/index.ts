@@ -3,6 +3,7 @@ import { check } from "express-validator";
 import { QueuePosition } from "../../../../db/entities/QueuePosition";
 import { findUserById, findQueueById, createQueuePosition } from "../../../../services";
 import { paginationQuery } from "../../../../util/query";
+import logger from "../../../../core/logger";
 
 interface IGetQuery extends IQueryParameters {
   skip: string;
@@ -55,6 +56,7 @@ export class Post extends Route {
   authorization = true;
 
   async onRequest(req: IRequest<any, IPostBody>) {
+    const { authorization } = req;
     const { id } = req.body;
 
     const queue = await findQueueById(req.params.id);
@@ -68,6 +70,8 @@ export class Post extends Route {
         }
       )
     );
+
+    logger.info('Queue position created', { queue: queue.id, user: user.id, by: authorization.name });
     
     return {
       position: position.dto(),
