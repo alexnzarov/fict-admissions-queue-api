@@ -71,7 +71,5 @@ export const advanceQueue = async (queue: Queue) => {
 
   position.status = QueuePositionStatus.PROCESSING;
 
-  queue.setLastAdvanced(position.position);
-
   return await position.save();
 };

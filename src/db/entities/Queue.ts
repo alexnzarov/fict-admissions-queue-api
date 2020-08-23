@@ -1,9 +1,8 @@
-import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
+import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany, LessThanOrEqual } from "typeorm";
 import { ExtendedEntity } from "./ExtendedEntity";
 import { QueuePosition, QueuePositionStatus } from "./QueuePosition";
 
 const positionCache = {};
-const lastAdvanceCache = {};
 
 @Entity("queues")
 class Queue extends ExtendedEntity {
@@ -63,16 +62,16 @@ class Queue extends ExtendedEntity {
     return ++positionCache[this.id];
   }
 
-  public setLastAdvanced(pos: number) {
-    lastAdvanceCache[this.id] = pos;
-  }
+  public async getRelativePosition({ position }: QueuePosition) {
+    const count = QueuePosition.count({
+      where: { 
+        queue: this,
+        status: QueuePositionStatus.WAITING,
+        position: LessThanOrEqual(position),
+      },
+    });
 
-  public getLastAdvanced() {
-    return lastAdvanceCache[this.id] ?? 0;
-  }
-
-  public getRelativePosition({ position }: QueuePosition) {
-    return Math.max(position - this.getLastAdvanced(), 1);
+    return count;
   }
 
   public static async updatePositionCache() {
@@ -86,15 +85,7 @@ class Queue extends ExtendedEntity {
         },
       });
 
-      const firstToAdvance = await QueuePosition.findOne({
-        where: { queue, status: QueuePositionStatus.WAITING },
-        order: {
-          position: 'ASC',
-        },
-      });
-
       positionCache[queue.id] = lastPosition ? lastPosition.code : 0;
-      lastAdvanceCache[queue.id] = firstToAdvance ? firstToAdvance.position - 1 : positionCache[queue.id];
     }
   }
 }
