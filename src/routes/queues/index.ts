@@ -14,7 +14,7 @@ export class Get extends Route {
   method = RequestMethod.GET;
 
   async onRequest() {
-    const queues = await Queue.find();
+    const queues = await Queue.find({ order: { active: 'DESC' } });
 
     return {
       queues: queues.map(q => q.dto()),
