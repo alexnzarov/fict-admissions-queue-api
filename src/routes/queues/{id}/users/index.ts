@@ -33,7 +33,7 @@ export class Get extends Route {
           where: { queue },
           relations: ['user'], 
           order: {
-            code: 'ASC',
+            position: 'ASC',
           },
         }
       )
