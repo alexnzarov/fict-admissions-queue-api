@@ -13,7 +13,7 @@ export class Get extends Route {
     
     return {
       user: user.dto(),
-      queues: positions.map(p => ({ ...p.queue.dto(), position: p.dto() })),
+      queues: positions.map(p => ({ ...p.queue.dto(), position: { ...p.dto(), relativePosition: p.queue.getRelativePosition(p) } })),
     };
   }
 };

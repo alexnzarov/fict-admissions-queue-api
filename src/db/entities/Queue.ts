@@ -3,6 +3,7 @@ import { ExtendedEntity } from "./ExtendedEntity";
 import { QueuePosition, QueuePositionStatus } from "./QueuePosition";
 
 const positionCache = {};
+const lastAdvanceCache = {};
 
 @Entity("queues")
 class Queue extends ExtendedEntity {
@@ -62,6 +63,18 @@ class Queue extends ExtendedEntity {
     return ++positionCache[this.id];
   }
 
+  public setLastAdvanced(pos: number) {
+    lastAdvanceCache[this.id] = pos;
+  }
+
+  public getLastAdvanced() {
+    return lastAdvanceCache[this.id] ?? 0;
+  }
+
+  public getRelativePosition({ position }: QueuePosition) {
+    return Math.max(position - this.getLastAdvanced(), 1);
+  }
+
   public static async updatePositionCache() {
     const queues = await Queue.find();
 
@@ -73,7 +86,15 @@ class Queue extends ExtendedEntity {
         },
       });
 
+      const firstToAdvance = await QueuePosition.findOne({
+        where: { queue, status: QueuePositionStatus.WAITING },
+        order: {
+          position: 'ASC',
+        },
+      });
+
       positionCache[queue.id] = lastPosition ? lastPosition.code : 0;
+      lastAdvanceCache[queue.id] = firstToAdvance ? firstToAdvance.position - 1 : 0;
     }
   }
 }
