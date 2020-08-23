@@ -41,7 +41,7 @@ export class Get extends Route {
 
     return {
       count,
-      positions: positions.map(p => ({ ...p.dto(), user: p.user.dto() })),
+      positions: await Promise.all(positions.map(async p => ({ ...p.dto(), relativePosition: await queue.getRelativePosition(p), user: p.user.dto() }))),
     };
   }
 };
