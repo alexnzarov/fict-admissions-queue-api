@@ -1,7 +1,7 @@
 import { Route, RequestMethod, IRequest } from "../../../../../core/api";
 import { findUserById, findQueueById, deleteQueuePosition, findQueuePosition } from "../../../../../services";
 import logger from "../../../../../core/logger";
-import { QueuePositionStatus, QueuePosition } from "../../../../../db/entities/QueuePosition";
+import { QueuePositionStatus } from "../../../../../db/entities/QueuePosition";
 import { check } from "express-validator";
 
 interface IPutBody {
@@ -20,7 +20,7 @@ export class Delete extends Route {
     const queue = await findQueueById(req.params.id);
     const user = await findUserById(req.params.user_id);
 
-    await deleteQueuePosition(queue, user);
+    await queue.consecutive(() => deleteQueuePosition(queue, user));
 
     logger.info('Queue position deleted', { queue: queue.id, user: user.id, by: authorization.name });
   }
@@ -51,15 +51,21 @@ export class Put extends Route {
     const user = await findUserById(req.params.user_id);
     const position = await findQueuePosition(queue, user);
     
-    if (positionNum) {
+    if (positionNum && positionNum != position.position) {
       position.position = positionNum;
+
+      await user.sendMessage('moved', { queue: queue.name });
     }
 
-    if (status) {
+    if (status && status != position.status) {
       position.status = status;
+
+      if (status === QueuePositionStatus.PROCESSING) {
+        await user.sendMessage('processing', { queue: queue.name });
+      }
     }
 
-    await position.save();
+    await queue.consecutive(() => position.save());
 
     logger.info('Queue position updated', { queue: queue.id, user: user.id, data: { position: positionNum, status }, by: authorization.name });
 

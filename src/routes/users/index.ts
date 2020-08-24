@@ -49,9 +49,9 @@ export class Post extends Route {
   validation = [
     check('id').isString(),
     check('telegram').optional({ nullable: true }).isBoolean(),
-    check('username').optional({ nullable: true }).isString(),
-    check('first_name').isString(),
-    check('last_name').optional({ nullable: false }).isString(),
+    check('username').optional({ nullable: true }).isString().isLength({ min: 1 }),
+    check('first_name').isString().isLength({ min: 1 }),
+    check('last_name').optional({ nullable: false }).isString().isLength({ min: 1 }),
   ];
   authorization = true;
 

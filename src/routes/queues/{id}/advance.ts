@@ -11,7 +11,8 @@ export class Post extends Route {
   async onRequest(req: IRequest) {
     const { authorization } = req; 
     const queue = await findQueueById(req.params.id);
-    const position = await advanceQueue(queue);
+
+    const position = await queue.consecutive(() => advanceQueue(queue));
 
     logger.info('Queue advanced', { queue: queue.id, position: position.user.id, by: authorization.name });
 

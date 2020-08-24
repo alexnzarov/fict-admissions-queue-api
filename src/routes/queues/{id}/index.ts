@@ -3,7 +3,7 @@ import { check } from "express-validator";
 import logger from "../../../core/logger";
 import { findQueueById } from "../../../services";
 
-interface IPostBody {
+interface IPutBody {
   active: boolean;
 };
 
@@ -24,7 +24,7 @@ export class Get extends Route {
 };
 
 /** PUT /queues/:id */
-export class Post extends Route {
+export class Put extends Route {
   url = '/queues/:id';
   method = RequestMethod.PUT;
   validation = [
@@ -32,7 +32,7 @@ export class Post extends Route {
   ];
   authorization = true;
 
-  async onRequest(req: IRequest<any, IPostBody>) {
+  async onRequest(req: IRequest<any, IPutBody>) {
     const { authorization } = req;
     const { active } = req.body; 
     const queue = await findQueueById(req.params.id);
@@ -48,5 +48,21 @@ export class Post extends Route {
     return {
       queue: queue.dto(),
     }
+  }
+};
+
+/** DELETE /queues/:id */
+export class Delete extends Route {
+  url = '/queues/:id';
+  method = RequestMethod.DELETE;
+  authorization = true;
+
+  async onRequest(req: IRequest<any, IPutBody>) {
+    const { authorization } = req;
+    const queue = await findQueueById(req.params.id);
+
+    await queue.remove();
+
+    logger.info('Queue deleted', { id: queue.id, name: queue.name, by: authorization.name });
   }
 };

@@ -71,5 +71,23 @@ export const advanceQueue = async (queue: Queue) => {
 
   position.status = QueuePositionStatus.PROCESSING;
 
-  return await position.save();
+  await position.save();
+  await notifyQueue(queue);
+
+  return position;
+};
+
+export const notifyQueue = async (queue: Queue) => {
+  const positions = await QueuePosition.find({
+    where: { status: QueuePositionStatus.WAITING, queue },
+    order: {
+      position: 'ASC',
+    },
+    relations: ['user'],
+  });
+
+  for (let i = 0; i < positions.length; i++) {
+    const { user } = positions[i];
+    await user.sendMessage('position', { queue: queue.name, position: i + 1 });
+  }
 };

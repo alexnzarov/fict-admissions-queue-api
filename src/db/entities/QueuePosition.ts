@@ -30,6 +30,9 @@ class QueuePosition extends ExtendedEntity {
   @Column({ default: QueuePositionStatus.WAITING })
   public status: QueuePositionStatus;
 
+  @Column({ name: 'last_notified_position', type: 'int', default: 0 })
+  public lastNotifiedPosition: number;
+
   @CreateDateColumn({ name: 'created_at' })
   public createdAt: Date;
 

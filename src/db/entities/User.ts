@@ -1,6 +1,13 @@
 import { Entity, Column, PrimaryColumn, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { ExtendedEntity } from "./ExtendedEntity";
 import { QueuePosition } from "./QueuePosition";
+import { sendMessage } from "../../core/bot";
+
+const messages = {
+  processing: (u, d) => `<b>${d.queue}</b>\n\nВаша заявка вже оброблюється оператором. Можете підходити до 339 кабінету.`,
+  moved: (u, d) => `<b>${d.queue}</b>\n\nВашу заявку посунули у черзі.`,
+  position: (u, d) => `<b>${d.queue}</b>\n\nВаша позиція у черзі: ${d.position}`,
+};
 
 @Entity("users")
 class User extends ExtendedEntity {
@@ -30,6 +37,13 @@ class User extends ExtendedEntity {
 
   @OneToMany(type => QueuePosition, position => position.user, { lazy: true })
   public queuePositions: Promise<QueuePosition[]>;
+
+  public async sendMessage(type: 'processing' | 'position' | 'moved', data: any = {}) {
+    if (!this.telegram) { return; }
+
+    const text = await messages[type](this, data);
+    sendMessage(this.id, text, 'HTML');
+  }
 
   public dto() {
     return this.pick('id', 'username', 'firstName', 'lastName', 'telegram', 'details', 'createdAt', 'updatedAt');
