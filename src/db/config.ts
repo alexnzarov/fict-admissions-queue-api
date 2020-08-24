@@ -1,5 +1,4 @@
 import { ConnectionOptions } from 'typeorm';
-import fs from 'fs';
 
 const options: ConnectionOptions = {
   type: 'postgres',
@@ -10,9 +9,6 @@ const options: ConnectionOptions = {
   database: process.env.DB_NAME ?? 'postgres',
   schema: process.env.DB_SCHEMA ?? 'public',
   logging: process.env.LOG_LEVEL === 'debug',
-  ssl: {
-    ca: fs.readFileSync(`${__dirname}/../../ca.crt`),
-  },
   synchronize: true,
   entities: [
     `${__dirname}/entities/*.js`,
