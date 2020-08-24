@@ -9,6 +9,7 @@ const options: ConnectionOptions = {
   database: process.env.DB_NAME ?? 'postgres',
   schema: process.env.DB_SCHEMA ?? 'public',
   logging: process.env.LOG_LEVEL === 'debug',
+  ssl: true,
   synchronize: true,
   entities: [
     `${__dirname}/entities/*.js`,
