@@ -72,6 +72,7 @@ export const advanceQueue = async (queue: Queue) => {
   position.status = QueuePositionStatus.PROCESSING;
 
   await position.save();
+  await position.user.sendMessage('processing', { queue: queue.name });
   await notifyQueue(queue);
 
   return position;
