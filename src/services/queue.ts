@@ -83,6 +83,7 @@ export const notifyQueue = async (queue: Queue) => {
     order: {
       position: 'ASC',
     },
+    take: 5,
     relations: ['user'],
   });
 
