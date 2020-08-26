@@ -36,7 +36,7 @@ export const tokens: IToken[] = [
   {
     name: 'Пошта',
     text: 'Вкажіть вашу електронну пошту (наприклад: john@gmail.com)\n\n<i>Ваші особисті дані будуть використані лише для формування заявки на вступ.</i>',
-    token: 'phone_number',
+    token: 'email',
     optional: true,
   },
   {
