@@ -12,7 +12,7 @@ interface IMessageData {
 };
 
 const messages = {
-  processing: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВаша заявка вже оброблюється оператором. Можете заходити до корпусу.\n<b>Номер вашого оператору: ${d.operator ?? '0'}\nВаш номер: ${d.code}</b>`,
+  processing: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВаша заявка вже оброблюється оператором. Можете заходити до корпусу.\n\n<b>Номер вашого оператору: ${d.operator ?? '0'}\nВаш номер: ${d.code}</b>`,
   moved: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВашу заявку посунули у черзі на ${d.delta} позицій ${d.delta > 0 ? 'назад' : 'вперед'}.`,
   position: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВаша позиція у черзі: <b>${d.position}</b>\nНе відходьте далеко від корпусу.`,
   deleted: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nДякую за користування нашою електронною чергою.`,
