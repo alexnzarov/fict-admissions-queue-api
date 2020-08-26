@@ -53,6 +53,9 @@ export class Route<Q extends IQueryParameters = any, B = any> {
 
     const fn = async (req, res, next) => {
       const result = await this.onRequest(req, res, next);
+      
+      if (res.headersSent) { return; }
+
       if (typeof(result) === 'object') {
         res.status(200).json(result);
       } else {

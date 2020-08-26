@@ -7,6 +7,7 @@ export interface IAuthorizationOptions {
 };
 
 export interface IAuthorization {
+  operator: string;
   name: string;
   type: string;
 };
@@ -18,7 +19,7 @@ JSON.parse(process.env.AUTH_TOKENS ?? '[]').forEach(t => tokens[t] = true);
 Object.keys(users).forEach(name => tokens[Buffer.from(`${name}:${users[name]}`, 'utf8').toString('base64')] = name);
 
 export default () => (req: IRequest, res, next) => {
-  const [type, token] = (req.headers.authorization ?? '').split(' ');
+  const [type, token, operator] = (req.headers.authorization ?? '').split(' ');
   const user = tokens[token];
 
   if (!user) {
@@ -28,6 +29,7 @@ export default () => (req: IRequest, res, next) => {
   req.authorization = {
     name: typeof(user) === 'string' ? user : 'system',
     type,
+    operator: operator ?? '0',
   };
 
   next();

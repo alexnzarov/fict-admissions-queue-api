@@ -3,6 +3,7 @@ import { ServiceException } from '../core/exception';
 import { QueuePosition, QueuePositionStatus } from '../db/entities/QueuePosition';
 import { User } from '../db/entities/User';
 import { FindOneOptions, FindManyOptions } from 'typeorm';
+import { IAuthorization } from '../middlewares/authorization';
 
 export const findQueueById = async (id: number | string, options?: FindOneOptions<Queue>) => {
   const queue = await Queue.findOne({
@@ -57,7 +58,7 @@ export const deleteQueuePosition = async (queue: Queue, user: User) => {
 
 export const updateQueueCache = () => Queue.updatePositionCache();
 
-export const advanceQueue = async (queue: Queue) => {
+export const advanceQueue = async (queue: Queue, auth: IAuthorization) => {
   const position = await QueuePosition.findOne({ status: QueuePositionStatus.WAITING, queue }, {
     order: {
       position: 'ASC',
@@ -72,7 +73,7 @@ export const advanceQueue = async (queue: Queue) => {
   position.status = QueuePositionStatus.PROCESSING;
 
   await position.save();
-  await position.user.sendMessage('processing', { queue: queue.name });
+  await position.user.sendMessage('processing', { queue: queue.name, code: position.code, operator: auth.operator });
   await notifyQueue(queue);
 
   return position;
@@ -84,12 +85,20 @@ export const notifyQueue = async (queue: Queue) => {
     order: {
       position: 'ASC',
     },
-    take: 5,
+    take: 20,
     relations: ['user'],
   });
 
-  for (let i = 0; i < positions.length; i++) {
-    const { user } = positions[i];
-    await user.sendMessage('position', { queue: queue.name, position: i + 1 });
+  for (let i = 0; i < Math.min(positions.length, 10); i++) {
+    const numPosition = i + 1;
+    const position = positions[i];
+
+    if (position.lastNotifiedPosition != numPosition) {
+      if (position.lastNotifiedPosition < numPosition || i < 10) { 
+        position.lastNotifiedPosition = numPosition
+        await position.save();
+        await position.user.sendMessage('position', { queue: queue.name, position: numPosition });
+      }
+    }
   }
 };

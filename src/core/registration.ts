@@ -4,6 +4,7 @@ export interface IToken {
   token: string;
   optional: boolean;
   values?: string[];
+  validation?: (value: string) => boolean;
 };
 
 export const tokens: IToken[] = [
@@ -21,7 +22,7 @@ export const tokens: IToken[] = [
   },
   {
     name: 'По батькові',
-    text: 'Введіть своє по батькові (наприклад: Григорович)',
+    text: 'Введіть своє по батькові (наприклад: Григорович) або відправте "-", якщо у вас його немає',
     token: 'father_name',
     optional: false,
   },
@@ -38,11 +39,13 @@ export const tokens: IToken[] = [
     text: 'Вкажіть вашу електронну пошту (наприклад: john@gmail.com)\n\n<i>Ваші особисті дані будуть використані лише для формування заявки на вступ.</i>',
     token: 'email',
     optional: true,
+    validation: (value) => (/^\S+@\S+\.\S+$/).test(value),
   },
   {
     name: 'Телефон',
     text: 'Вкажіть ваш номер телефону (наприклад: +380961234567)\n\n<i>Ваші особисті дані будуть використані лише для формування заявки на вступ.</i>',
     token: 'phone_number',
     optional: true,
+    validation: (value) => (/^[+]38[0-9]{10}$/).test(value)
   },
 ];

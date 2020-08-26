@@ -12,7 +12,7 @@ export class Post extends Route {
     const { authorization } = req; 
     const queue = await findQueueById(req.params.id);
 
-    const position = await queue.consecutive(() => advanceQueue(queue));
+    const position = await queue.consecutive(() => advanceQueue(queue, authorization));
 
     logger.info('Queue advanced', { queue: queue.id, position: position.user.id, by: authorization.name });
 

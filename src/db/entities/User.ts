@@ -3,10 +3,19 @@ import { ExtendedEntity } from "./ExtendedEntity";
 import { QueuePosition } from "./QueuePosition";
 import { sendMessage } from "../../core/bot";
 
+interface IMessageData {
+  queue: string;
+  position?: number;
+  delta?: number;
+  operator?: string;
+  code?: number;
+};
+
 const messages = {
-  processing: (u, d) => `<b>${d.queue}</b>\n\nВаша заявка вже оброблюється оператором. Можете підходити до 339 кабінету.`,
-  moved: (u, d) => `<b>${d.queue}</b>\n\nВашу заявку посунули у черзі.`,
-  position: (u, d) => `<b>${d.queue}</b>\n\nВаша позиція у черзі: ${d.position}`,
+  processing: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВаша заявка вже оброблюється оператором. Можете заходити до корпусу.\n<b>Номер вашого оператору: ${d.operator ?? '0'}\nВаш номер: ${d.code}</b>`,
+  moved: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВашу заявку посунули у черзі на ${d.delta} позицій ${d.delta > 0 ? 'назад' : 'вперед'}.`,
+  position: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nВаша позиція у черзі: <b>${d.position}</b>\nНе відходьте далеко від корпусу.`,
+  deleted: (u, d: IMessageData) => `<b>${d.queue}</b>\n\nДякую за користування нашою електронною чергою.`,
 };
 
 @Entity("users")
@@ -38,7 +47,7 @@ class User extends ExtendedEntity {
   @OneToMany(type => QueuePosition, position => position.user, { lazy: true })
   public queuePositions: Promise<QueuePosition[]>;
 
-  public async sendMessage(type: 'processing' | 'position' | 'moved', data: any = {}) {
+  public async sendMessage(type: 'processing' | 'position' | 'moved' | 'deleted', data: IMessageData) {
     if (!this.telegram) { return; }
 
     const text = await messages[type](this, data);

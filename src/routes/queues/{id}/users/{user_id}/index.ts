@@ -1,5 +1,5 @@
 import { Route, RequestMethod, IRequest } from "../../../../../core/api";
-import { findUserById, findQueueById, deleteQueuePosition, findQueuePosition } from "../../../../../services";
+import { findUserById, findQueueById, deleteQueuePosition, findQueuePosition, notifyQueue } from "../../../../../services";
 import logger from "../../../../../core/logger";
 import { QueuePositionStatus } from "../../../../../db/entities/QueuePosition";
 import { check } from "express-validator";
@@ -21,6 +21,7 @@ export class Delete extends Route {
     const user = await findUserById(req.params.user_id);
 
     await queue.consecutive(() => deleteQueuePosition(queue, user));
+    await user.sendMessage('deleted', { queue: queue.name });
 
     logger.info('Queue position deleted', { queue: queue.id, user: user.id, by: authorization.name });
   }
@@ -32,7 +33,7 @@ export class Put extends Route {
   method = RequestMethod.PUT;
   authorization = true;
   validation = [
-    check('position').optional({ nullable: true }).isInt({ min: 1 }),
+    check('position').optional({ nullable: true }).isInt(),
     check('status').optional({ nullable: true }).custom(v => {
       const exists = Object.keys(QueuePositionStatus).map(k => QueuePositionStatus[k]).find(s => s === v);
       
@@ -51,21 +52,38 @@ export class Put extends Route {
     const user = await findUserById(req.params.user_id);
     const position = await findQueuePosition(queue, user);
     
+    let positionDelta = 0;
     if (positionNum && positionNum != position.position) {
-      position.position = positionNum;
+      const old = position.position;
+      position.position = Math.max(Math.min(positionNum, queue.getLastPosition() + 1), 0);
 
-      await user.sendMessage('moved', { queue: queue.name });
+      positionDelta = position.position - old;
     }
 
+    let statusUpdated = false;
     if (status && status != position.status) {
       position.status = status;
 
-      if (status === QueuePositionStatus.PROCESSING) {
-        await user.sendMessage('processing', { queue: queue.name });
-      }
+      statusUpdated = true;
     }
+    
+    await queue.consecutive(async () => {
+      const pos = await position.save();
+      
+      if (positionDelta != 0) {
+        await user.sendMessage('moved', { queue: queue.name, delta: positionDelta });
+      }
 
-    await queue.consecutive(() => position.save());
+      if (statusUpdated || positionDelta != 0) { 
+        await notifyQueue(queue); 
+        
+        if (status === QueuePositionStatus.PROCESSING) {
+          await user.sendMessage('processing', { queue: queue.name, operator: authorization.operator, code: position.code });
+        }
+      }
+
+      return pos;
+    });
 
     logger.info('Queue position updated', { queue: queue.id, user: user.id, data: { position: positionNum, status }, by: authorization.name });
 
