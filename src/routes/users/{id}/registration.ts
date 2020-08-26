@@ -16,7 +16,7 @@ export class Post extends Route {
     const { authorization } = req;
     const user = await findUserById(req.params.id);
     
-    const details = pick(req.body, tokens.map(t => t.token));
+    const details = pick(req.body, tokens.map(t => t.token), false);
     user.details = Object.assign(user.details, details);
 
     logger.info('User details updated', { id: user.id, details, by: authorization.name });
