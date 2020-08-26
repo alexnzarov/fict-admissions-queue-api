@@ -55,7 +55,7 @@ export class Put extends Route {
     let positionDelta = 0;
     if (positionNum && positionNum != position.position) {
       const old = position.position;
-      position.position = Math.max(Math.min(positionNum, queue.getLastPosition() + 1), 0);
+      position.position = Math.max(positionNum, 0);
 
       positionDelta = position.position - old;
     }
