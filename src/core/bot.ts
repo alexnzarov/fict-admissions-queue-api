@@ -22,5 +22,5 @@ export const broadcastMessage = (ids: string[], text, parseMode: 'HTML' | 'Markd
     uids: ids,
     text,
     parse_mode: parseMode,
-  });
+  }, { headers: { Authorization: `Bearer ${API_TOKEN}` } });
 };
