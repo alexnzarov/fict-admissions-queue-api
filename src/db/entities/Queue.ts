@@ -28,7 +28,7 @@ class Queue extends ExtendedEntity {
   public updatedAt: Date;
 
   public dto() {
-    return this.pick('id', 'name', 'active', 'createdAt');
+    return this.pick('id', 'name', 'active', 'open', 'createdAt');
   }
 
   public getWaitingPositions(size: number) {

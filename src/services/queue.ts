@@ -70,7 +70,7 @@ export const advanceQueue = async (queue: Queue, auth: IAuthorization) => {
     throw ServiceException.build(404, 'У черзі нікого немає');
   }
 
-  position.status = QueuePositionStatus.PROCESSING;
+  position.status = QueuePositionStatus.GOING;
 
   await position.save();
   await position.user.sendMessage('processing', { queue: queue.name, code: position.code, operator: auth.operator });

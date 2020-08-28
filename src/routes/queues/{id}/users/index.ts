@@ -5,6 +5,7 @@ import { findUserById, findQueueById, createQueuePosition } from "../../../../se
 import { paginationQuery } from "../../../../util/query";
 import logger from "../../../../core/logger";
 import { RoleType } from "../../../../db/entities/Role";
+import { ServiceException } from "../../../../core/exception";
 
 interface IGetQuery extends IQueryParameters {
   skip: string;
@@ -64,6 +65,14 @@ export class Post extends Route {
 
     const queue = await findQueueById(req.params.id);
     const user = await findUserById(id);
+
+    if (!queue.open) {
+      throw ServiceException.build(400, 'Черга зачинена');
+    }
+
+    if (!queue.active) {
+      throw ServiceException.build(400, 'Черга неактивна');
+    }
 
     const position = await createQueuePosition(
       QueuePosition.create(

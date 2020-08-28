@@ -5,6 +5,7 @@ import { Queue } from "./Queue";
 
 export enum QueuePositionStatus {
   WAITING = 'waiting',
+  GOING = 'going',
   PROCESSING = 'processing',
 };
 
