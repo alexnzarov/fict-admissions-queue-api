@@ -15,6 +15,9 @@ class Queue extends ExtendedEntity {
   @Column()
   public active: boolean;
 
+  @Column({ default: false })
+  public open: boolean;
+
   @OneToMany(type => QueuePosition, position => position.queue, { lazy: true })
   public positions: Promise<QueuePosition[]>;
 

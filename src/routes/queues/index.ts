@@ -3,6 +3,7 @@ import { Route, RequestMethod, IRequest } from "../../core/api";
 import { check } from "express-validator";
 import logger from "../../core/logger";
 import { createQueue } from "../../services";
+import { RoleType } from "../../db/entities/Role";
 
 interface IPostBody {
   name: string;
@@ -30,6 +31,7 @@ export class Post extends Route {
     check('name').isString().isLength({ min: 1 }),
   ];
   authorization = true;
+  role = RoleType.ADMIN;
 
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
@@ -44,7 +46,7 @@ export class Post extends Route {
       )
     );
 
-    logger.info('Queue created', { id: queue.id, name: queue.name, by: authorization.name });
+    logger.info('Queue created', { id: queue.id, name: queue.name, by: authorization.role.username });
 
     return {
       queue: queue.dto(),

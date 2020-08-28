@@ -4,6 +4,7 @@ import { User } from "../../db/entities/User";
 import { searchQuery } from "../../util/query";
 import logger from "../../core/logger";
 import { createUser } from "../../services";
+import { RoleType } from "../../db/entities/Role";
 
 interface IGetQuery extends IQueryParameters {
   search: string;
@@ -30,6 +31,7 @@ export class Get extends Route {
     check('take').optional().isInt(),
   ];
   authorization = true;
+  role = RoleType.RECEPTION;
 
   async onRequest(req: IRequest<IGetQuery>) {
     const count = await User.count(searchQuery(['username', 'firstName', 'lastName'], { search: req.query.search }));
@@ -54,6 +56,7 @@ export class Post extends Route {
     check('last_name').optional({ nullable: false }).isString().isLength({ min: 1 }),
   ];
   authorization = true;
+  role = RoleType.RECEPTION;
 
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
@@ -71,7 +74,7 @@ export class Post extends Route {
       )
     );
 
-    logger.info('User created', { id, by: authorization.name });
+    logger.info('User created', { id, by: authorization.role.username });
   
     return {
       user: user.dto(),

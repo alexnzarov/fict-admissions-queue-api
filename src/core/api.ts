@@ -3,6 +3,8 @@ import { ValidationChain } from 'express-validator';
 import { asyncHandle } from '../middlewares/errorHandling';
 import requestValidation from '../middlewares/requestValidation';
 import authorization, { IAuthorization } from '../middlewares/authorization';
+import { RoleType } from '../db/entities/Role';
+import requireRole from '../middlewares/requireRole';
 
 export interface IQueryParameters { [x: string]: string };
 
@@ -32,6 +34,7 @@ export class Route<Q extends IQueryParameters = any, B = any> {
   public middlewares?: RouteMiddleware[];
   public validation?: ValidationChain[];
   public authorization?: boolean;
+  public role?: RoleType;
 
   public onRequest(req: IRequest<Q, B>, res: IResponse, next: NextFunction): any {};
 
@@ -40,6 +43,10 @@ export class Route<Q extends IQueryParameters = any, B = any> {
 
     if (this.authorization) {
       middleware.push(authorization());
+
+      if (this.role) {
+        middleware.push(requireRole(this.role));
+      }
     }
 
     if (this.validation) {

@@ -25,7 +25,7 @@ for (let i = 0; i < routes.length; i++) {
     if (RouteController.constructor) {
       const route = new RouteController() as Route;
       route.initialize(app);
-      logger.debug(`${route.authorization ? '[A]' : '[N]'} ${route.method.toUpperCase()} ${route.url}\t\t\t\t\t`)
+      logger.debug(`${route.authorization ? '[A]' : '[N]'} ${route.role ? `[${route.role}]` : '[none]'} ${route.method.toUpperCase()} ${route.url}\t\t\t\t\t`)
     }
   }
 }

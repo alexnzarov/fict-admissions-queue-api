@@ -4,6 +4,7 @@ import { QueuePosition } from "../../../../db/entities/QueuePosition";
 import { findUserById, findQueueById, createQueuePosition } from "../../../../services";
 import { paginationQuery } from "../../../../util/query";
 import logger from "../../../../core/logger";
+import { RoleType } from "../../../../db/entities/Role";
 
 interface IGetQuery extends IQueryParameters {
   skip: string;
@@ -23,6 +24,7 @@ export class Get extends Route {
     check('take').optional().isInt(),
   ];
   authorization = true;
+  role = RoleType.RECEPTION;
 
   async onRequest(req: IRequest<IGetQuery>) {
     const queue = await findQueueById(req.params.id);
@@ -54,6 +56,7 @@ export class Post extends Route {
     check('id').isString(),
   ];
   authorization = true;
+  role = RoleType.RECEPTION;
 
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
@@ -71,7 +74,7 @@ export class Post extends Route {
       )
     );
 
-    logger.info('Queue position created', { queue: queue.id, user: user.id, by: authorization.name });
+    logger.info('Queue position created', { queue: queue.id, user: user.id, by: authorization.role.username });
     
     return {
       position: position.dto(),

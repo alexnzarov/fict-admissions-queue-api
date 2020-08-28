@@ -4,6 +4,7 @@ import { tokens } from "../../../core/registration";
 import { pick } from "../../../util/object";
 import logger from "../../../core/logger";
 import { findUserById } from "../../../services";
+import { RoleType } from "../../../db/entities/Role";
 
 /** PUT /users/:id/registration */
 export class Post extends Route {
@@ -11,6 +12,7 @@ export class Post extends Route {
   method = RequestMethod.PUT;
   validation = tokens.map(t => check(t.token).optional({ nullable: true }).isString());
   authorization = true;
+  role = RoleType.RECEPTION;
 
   async onRequest(req: IRequest, res: IResponse) {
     const { authorization } = req;
@@ -38,7 +40,7 @@ export class Post extends Route {
 
     user.details = Object.assign(user.details, details);
 
-    logger.info('User details updated', { id: user.id, details, by: authorization.name });
+    logger.info('User details updated', { id: user.id, details, by: authorization.role.username });
 
     await user.save();
     
