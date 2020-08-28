@@ -16,3 +16,11 @@ export const sendMessage = (id: string, text: string, parseMode: 'HTML' | 'Markd
     },
   }).catch((e) => logger.error('Failed to send Telegram message', { id, text, error: e.toString() }));
 };
+
+export const broadcastMessage = (ids: string[], text, parseMode: 'HTML' | 'Markdown' = 'HTML') => {
+  return axios.post(`${BOT_API}/broadcastMessage`, {
+    uids: ids,
+    text,
+    parse_mode: parseMode,
+  });
+};
