@@ -80,7 +80,7 @@ export class Put extends Route {
       if (statusUpdated || positionDelta != 0) { 
         await notifyQueue(queue); 
         
-        if (status === QueuePositionStatus.PROCESSING) {
+        if (status === QueuePositionStatus.GOING) {
           await user.sendMessage('processing', { queue: queue.name, operator: authorization.operator, code: position.code });
         }
       }
