@@ -14,6 +14,7 @@ interface IGetQuery extends IQueryParameters {
 
 interface IPostBody {
   id: string;
+  force?: boolean;
 };
 
 /** GET /queues/:id/users */
@@ -55,23 +56,26 @@ export class Post extends Route {
   method = RequestMethod.POST;
   validation = [
     check('id').isString(),
+    check('force').optional({ nullable: true }).isBoolean(),
   ];
   authorization = true;
   role = RoleType.RECEPTION;
 
   async onRequest(req: IRequest<any, IPostBody>) {
     const { authorization } = req;
-    const { id } = req.body;
+    const { id, force } = req.body;
 
     const queue = await findQueueById(req.params.id);
     const user = await findUserById(id);
 
-    if (!queue.open) {
-      throw ServiceException.build(400, 'Черга зачинена');
-    }
+    if (!force) {
+      if (!queue.open) {
+        throw ServiceException.build(400, 'Черга зачинена');
+      }
 
-    if (!queue.active) {
-      throw ServiceException.build(400, 'Черга неактивна');
+      if (!queue.active) {
+        throw ServiceException.build(400, 'Черга неактивна');
+      }
     }
 
     const position = await createQueuePosition(
